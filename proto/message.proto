@@ -1,0 +1,81 @@
+syntax = "proto3";
+package message;
+
+
+enum ClientType{
+    UnknownType = 0;
+    // 订阅
+    BatchSubType = 1;
+    // 取消订阅
+    BatchUnSubType = 2;
+    // 发布
+    BatchPubType = 3;
+    // 查询
+    QueryType = 4;
+}
+
+message ClientMessage {
+    ClientType type = 1;
+    BatchSubRequest batchSub = 2;
+    BatchUnSubRequest batchUnsub = 3;
+    BatchPubRequest batchPub  = 4;
+    QueryRequest query  = 5;
+}
+
+message BatchPubRequest {
+    repeated PubRequest batch =1;
+}
+
+message PubRequest {
+    string Topic = 1;
+    bytes Payload = 2;
+    //当推送的Topic未找到且设置了此字段,则服务器将此字段返回给客户端
+    bytes NotFound = 3;
+}
+
+
+message BatchSubRequest {
+    repeated string topicList = 2;
+}
+
+message BatchUnSubRequest {
+    repeated string topicList = 2;
+}
+
+message QueryRequest {
+    repeated string topicList = 1;
+    bytes customData = 2;
+}
+
+enum ServerType{
+    UnknownResponseType = 0;
+    // 订阅
+    MessagesType = 1;
+    // 查询结果
+    QueryResponseType = 2;
+    // 推送主题未找到
+    PubNotFoundType = 3;
+}
+
+message ServerMessage {
+    ServerType type = 1;
+
+    //服务端推送过来的消息
+    repeated Message messages = 2;
+
+    //查询结果
+    QueryResponse query = 3;
+
+    //对应着PubRequest的NotFound字段
+    bytes pubNotFound = 4;
+}
+
+message QueryResponse {
+    repeated string topicList = 1;
+    bytes customData = 2;
+}
+
+message Message {
+    string Topic = 1;
+    bytes Payload = 2;
+}
